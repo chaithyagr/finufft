@@ -21,6 +21,7 @@ typedef struct cufinufft_opts { // see cufinufft_default_opts() for defaults
 
     int gpu_spreadinterponly; // 0: NUFFT, 1: spread or interpolation only
 
+    bool only_spread_interp; // 0: only do spread and interpolate, 1: do full NUFFT
     /* multi-gpu support */
     int gpu_device_id;
 } cufinufft_opts;

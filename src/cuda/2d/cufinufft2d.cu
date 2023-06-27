@@ -69,24 +69,26 @@ int CUFINUFFT2D1_EXEC(CUCPX *d_c, CUCPX *d_fk, CUFINUFFT_PLAN d_plan)
         printf("[time  ] \tSpread (%d)\t\t %.3g s\n", milliseconds / 1000, d_plan->opts.gpu_method);
 #endif
         // Step 2: FFT
-        cudaEventRecord(start);
-        CUFFT_EX(d_plan->fftplan, d_plan->fw, d_plan->fw, d_plan->iflag);
+        if(d_plan->opts.only_spread_interp) {
+            cudaEventRecord(start);
+            CUFFT_EX(d_plan->fftplan, d_plan->fw, d_plan->fw, d_plan->iflag);
 #ifdef TIME
-        cudaEventRecord(stop);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&milliseconds, start, stop);
-        printf("[time  ] \tCUFFT Exec\t\t %.3g s\n", milliseconds / 1000);
+            cudaEventRecord(stop);
+            cudaEventSynchronize(stop);
+            cudaEventElapsedTime(&milliseconds, start, stop);
+            printf("[time  ] \tCUFFT Exec\t\t %.3g s\n", milliseconds / 1000);
 #endif
 
-        // Step 3: deconvolve and shuffle
-        cudaEventRecord(start);
-        CUDECONVOLVE2D(d_plan, blksize);
+            // Step 3: deconvolve and shuffle
+            cudaEventRecord(start);
+            CUDECONVOLVE2D(d_plan, blksize);
 #ifdef TIME
-        cudaEventRecord(stop);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&milliseconds, start, stop);
-        printf("[time  ] \tDeconvolve\t\t %.3g s\n", milliseconds / 1000);
+            cudaEventRecord(stop);
+            cudaEventSynchronize(stop);
+            cudaEventElapsedTime(&milliseconds, start, stop);
+            printf("[time  ] \tDeconvolve\t\t %.3g s\n", milliseconds / 1000);
 #endif
+        }
     }
     return ier;
 }
@@ -124,27 +126,28 @@ int CUFINUFFT2D2_EXEC(CUCPX *d_c, CUCPX *d_fk, CUFINUFFT_PLAN d_plan)
         d_plan->c = d_cstart;
         d_plan->fk = d_fkstart;
 
-        // Step 1: amplify Fourier coeffs fk and copy into upsampled array fw
-        cudaEventRecord(start);
-        CUDECONVOLVE2D(d_plan, blksize);
+        if(d_plan->opts.only_spread_interp) {
+            // Step 1: amplify Fourier coeffs fk and copy into upsampled array fw
+            cudaEventRecord(start);
+            CUDECONVOLVE2D(d_plan, blksize);
 #ifdef TIME
-        float milliseconds = 0;
-        cudaEventRecord(stop);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&milliseconds, start, stop);
-        printf("[time  ] \tAmplify & Copy fktofw\t %.3g s\n", milliseconds / 1000);
+            float milliseconds = 0;
+            cudaEventRecord(stop);
+            cudaEventSynchronize(stop);
+            cudaEventElapsedTime(&milliseconds, start, stop);
+            printf("[time  ] \tAmplify & Copy fktofw\t %.3g s\n", milliseconds / 1000);
 #endif
-        // Step 2: FFT
-        cudaDeviceSynchronize();
-        cudaEventRecord(start);
-        CUFFT_EX(d_plan->fftplan, d_plan->fw, d_plan->fw, d_plan->iflag);
+            // Step 2: FFT
+            cudaDeviceSynchronize();
+            cudaEventRecord(start);
+            CUFFT_EX(d_plan->fftplan, d_plan->fw, d_plan->fw, d_plan->iflag);
 #ifdef TIME
-        cudaEventRecord(stop);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&milliseconds, start, stop);
-        printf("[time  ] \tCUFFT Exec\t\t %.3g s\n", milliseconds / 1000);
+            cudaEventRecord(stop);
+            cudaEventSynchronize(stop);
+            cudaEventElapsedTime(&milliseconds, start, stop);
+            printf("[time  ] \tCUFFT Exec\t\t %.3g s\n", milliseconds / 1000);
 #endif
-
+        }
         // Step 3: deconvolve and shuffle
         cudaEventRecord(start);
         ier = CUINTERP2D(d_plan, blksize);

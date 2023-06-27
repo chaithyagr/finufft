@@ -164,30 +164,34 @@ This performs:
 #endif
 
     cudaEventRecord(start);
-    cufftHandle fftplan;
-    switch (d_plan->dim) {
-    case 1: {
-        int n[] = {nf1};
-        int inembed[] = {nf1};
+    if d_plan->opts.only_spread_interp {
+        cufftHandle fftplan;
+        switch (d_plan->dim) {
+        case 1: {
+            int n[] = {nf1};
+            int inembed[] = {nf1};
 
-        cufftPlanMany(&fftplan, 1, n, inembed, 1, inembed[0], inembed, 1, inembed[0], CUFFT_TYPE, maxbatchsize);
-    } break;
-    case 2: {
-        int n[] = {nf2, nf1};
-        int inembed[] = {nf2, nf1};
+            cufftPlanMany(&fftplan, 1, n, inembed, 1, inembed[0], inembed, 1, inembed[0], CUFFT_TYPE, maxbatchsize);
+        } break;
+        case 2: {
+            int n[] = {nf2, nf1};
+            int inembed[] = {nf2, nf1};
 
-        cufftPlanMany(&fftplan, 2, n, inembed, 1, inembed[0] * inembed[1], inembed, 1, inembed[0] * inembed[1],
-                      CUFFT_TYPE, maxbatchsize);
-    } break;
-    case 3: {
-        int n[] = {nf3, nf2, nf1};
-        int inembed[] = {nf3, nf2, nf1};
+            cufftPlanMany(&fftplan, 2, n, inembed, 1, inembed[0] * inembed[1], inembed, 1, inembed[0] * inembed[1],
+                          CUFFT_TYPE, maxbatchsize);
+        } break;
+        case 3: {
+            int n[] = {nf3, nf2, nf1};
+            int inembed[] = {nf3, nf2, nf1};
 
-        cufftPlanMany(&fftplan, 3, n, inembed, 1, inembed[0] * inembed[1] * inembed[2], inembed, 1,
-                      inembed[0] * inembed[1] * inembed[2], CUFFT_TYPE, maxbatchsize);
-    } break;
+            cufftPlanMany(&fftplan, 3, n, inembed, 1, inembed[0] * inembed[1] * inembed[2], inembed, 1,
+                          inembed[0] * inembed[1] * inembed[2], CUFFT_TYPE, maxbatchsize);
+        } break;
+        }
+        d_plan->fftplan = fftplan;
     }
-    d_plan->fftplan = fftplan;
+    else 
+        d_plan->fftplan = NULL;
 #ifdef TIME
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
@@ -580,6 +584,8 @@ int CUFINUFFT_DEFAULT_OPTS(int type, int dim, cufinufft_opts *opts)
     opts->gpu_binsizez = -1;
 
     opts->gpu_spreadinterponly = 0; // default to do the whole nufft
+
+    opts->only_spread_interp = true;  // By default do FFTW also, i.e. do NUFFT
 
     switch (dim) {
     case 1: {
