@@ -28,6 +28,7 @@
 #undef CUFINUFFT_MAKEPLAN
 #undef CUFINUFFT_SETPTS
 #undef CUFINUFFT_EXECUTE
+#undef CUFINUFFT_SPREAD_INTERP
 #undef CUFINUFFT_DESTROY
 #undef CUFINUFFT1D1_EXEC
 #undef CUFINUFFT1D2_EXEC
@@ -98,6 +99,7 @@
 #define CUFINUFFT_MAKEPLAN cufinufftf_makeplan
 #define CUFINUFFT_SETPTS cufinufftf_setpts
 #define CUFINUFFT_EXECUTE cufinufftf_execute
+#define CUFINUFFT_SPREAD_INTERP cufinufftf_spread_interp
 #define CUFINUFFT_DESTROY cufinufftf_destroy
 #define CUFINUFFT1D1_EXEC cufinufftf1d1_exec
 #define CUFINUFFT1D2_EXEC cufinufftf1d2_exec
@@ -168,6 +170,7 @@
 #define CUFINUFFT_MAKEPLAN cufinufft_makeplan
 #define CUFINUFFT_SETPTS cufinufft_setpts
 #define CUFINUFFT_EXECUTE cufinufft_execute
+#define CUFINUFFT_SPREAD_INTERP cufinufft_spread_interp
 #define CUFINUFFT_DESTROY cufinufft_destroy
 #define CUFINUFFT1D1_EXEC cufinufft1d1_exec
 #define CUFINUFFT1D2_EXEC cufinufft1d2_exec
@@ -298,6 +301,7 @@ int CUFINUFFT_MAKEPLAN(int type, int dim, int *n_modes, int iflag, int ntransf, 
 int CUFINUFFT_SETPTS(int M, CUFINUFFT_FLT *h_kx, CUFINUFFT_FLT *h_ky, CUFINUFFT_FLT *h_kz, int N, CUFINUFFT_FLT *h_s,
                      CUFINUFFT_FLT *h_t, CUFINUFFT_FLT *h_u, CUFINUFFT_PLAN d_plan);
 int CUFINUFFT_EXECUTE(CUCPX *h_c, CUCPX *h_fk, CUFINUFFT_PLAN d_plan);
+int CUFINUFFT_SPREAD_INTERP(CUCPX *h_c, CUCPX *h_fk, CUFINUFFT_PLAN d_plan);
 int CUFINUFFT_DESTROY(CUFINUFFT_PLAN d_plan);
 #ifdef __cplusplus
 }

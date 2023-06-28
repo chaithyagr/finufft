@@ -416,6 +416,56 @@ Notes: the type CUFINUFFT_FLT means either single or double, matching the
     return 0;
 }
 
+int CUFINUFFT_SPREAD_INTERP(CUCPX *d_c, CUCPX *d_fk, CUFINUFFT_PLAN d_plan)
+/*
+    
+*/
+{
+    int orig_gpu_device_id;
+    cudaGetDevice(&orig_gpu_device_id);
+    cudaSetDevice(d_plan->opts.gpu_device_id);
+
+    int ier;
+    int type = d_plan->type;
+    switch (d_plan->dim) {
+    case 1: {
+        if (type == 1)
+            ier = CUFINUFFT_SPREAD1D(d_plan->nf1, d_fk, d_plan->M, d_plan->kx, d_c, d_plan);
+        if (type == 2)
+            ier = CUFINUFFT_INTERP1D(d_plan->nf1, d_fk, d_plan->M, d_plan->kx, d_c, d_plan);
+        if (type == 3) {
+            std::cerr << "Not Implemented yet" << std::endl;
+            ier = 1;
+        }
+    } break;
+    case 2: {
+        if (type == 1)
+            ier = CUFINUFFT_SPREAD2D(d_plan->nf1, d_plan->nf2, d_fk, d_plan->M, d_plan->kx, d_plan->ky, d_c, d_plan);
+        if (type == 2)
+            ier = CUFINUFFT_INTERP2D(d_plan->nf1, d_plan->nf2, d_fk, d_plan->M, d_plan->kx, d_plan->ky, d_c, d_plan);
+        if (type == 3) {
+            std::cerr << "Not Implemented yet" << std::endl;
+            ier = 1;
+        }
+    } break;
+    case 3: {
+        if (type == 1)
+            ier = CUFINUFFT_INTERP3D(d_plan->nf1, d_plan->nf2, d_plan->nf3, d_fk, d_plan->M, d_plan->kx, d_plan->ky, d_plan->kz, d_c, d_plan);
+        if (type == 2)
+            ier = CUFINUFFT_INTERP3D(d_plan->nf1, d_plan->nf2, d_plan->nf3, d_fk, d_plan->M, d_plan->kx, d_plan->ky, d_plan->kz, d_c, d_plan);
+        if (type == 3) {
+            std::cerr << "Not Implemented yet" << std::endl;
+            ier = 1;
+        }
+    } break;
+    }
+
+    // Multi-GPU support: reset the device ID
+    cudaSetDevice(orig_gpu_device_id);
+
+    return ier;
+}
+
 int CUFINUFFT_EXECUTE(CUCPX *d_c, CUCPX *d_fk, CUFINUFFT_PLAN d_plan)
 /*
     "exec" stage (single and double precision versions).
